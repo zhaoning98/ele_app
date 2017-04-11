@@ -24,9 +24,6 @@
   const ERR_OK = 0;
 
   export default {
-    components: {
-      'v-header': header
-    },
     data () {
       return {
         seller: {}
@@ -42,6 +39,9 @@
             console.log(this.seller);
           }
         });
+    },
+    components: {
+      'v-header': header
     }
   };
 
