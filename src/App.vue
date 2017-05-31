@@ -15,11 +15,13 @@
     <div class="content">
       <router-view></router-view>
     </div>
+    <!-- <v-shopcart></v-shopcart> -->
   </div>
 </template>
 
 <script>
   import header from './components/header/header';
+  import shopcart from './components/shopcart/shopcart';
 
   const ERR_OK = 0;
 
@@ -41,7 +43,8 @@
         });
     },
     components: {
-      'v-header': header
+      'v-header': header,
+      'v-shopcart': shopcart
     }
   };
 
