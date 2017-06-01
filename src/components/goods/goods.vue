@@ -1,44 +1,42 @@
 <template>
-  <div class="goods">
-  	<div class="goods-wrapper">
-  	 <div class="menu-wrapper">
-  		<ul>
-  		  <li v-for="(item, index) in goods" class="menu-item" :class="{current: currentIndex===index}" v-on:click="selectMenu(index, $event)">
-  		  	<span class="text border-1p">
-  		  	  <span class="icon" :class="classMap[item.type]"></span>{{ item.name }}
-  		  	</span>
-  		  </li>
-  		</ul>
-  	 </div>
-  	 <div class="foods-wrapper">
-  	   <ul>
-  	   	 <li v-for="item in goods" class="food-list food-list-hook">
-  	   	   <h1 class="title">{{ item.name }}</h1>
-  	   	   <ul>
-  	   	   	 <li v-for="food in item.foods" class="food-item border-1px">
-  	   	   	   <div class="icon">
-  	   	   	   	 <img width="57" height="57" :src="food.icon">
-  	   	   	   </div>
-  	   	   	   <div class="content">
-  	   	   	   	 <h2 class="name">{{ food.name }}</h2>
-  	   	   	   	 <p class="desc">{{ food.description }}</p>
-  	   	   	   	 <div class="extra">
-  	   	   	   	   <span class="count">月售{{ food.sellCount }}份</span><span>好评率{{ food.rating }}</span>
-  	   	   	   	 </div>
-  	   	   	   	 <div class="price">
-  	   	   	   	   <span class="now">￥{{ food.price }}</span><span class="old" v-show="food.oldPrice">￥{{ food.oldPrice }}</span>
-  	   	   	   	 </div>
-  	   	   	   	 <div class="cartcontrol-wrapper">
-  	   	   	   	   <cartcontrol :food="food"></cartcontrol>
-  	   	   	   	 </div>
-  	   	   	   </div>
-  	   	   	 </li>
-  	   	   </ul>
-  	   	 </li>
-  	   </ul>
-  	 </div>
-  	</div>
-  </div>
+	<div class="goods-wrapper">
+	 <div class="menu-wrapper" ref="menuWrapper">
+		<ul>
+		  <li v-for="(item, index) in goods" class="menu-item" :class="{current: currentIndex===index}" v-on:click="selectMenu(index, $event)">
+		  	<span class="text border-1p">
+		  	  <span class="icon" :class="classMap[item.type]"></span>{{ item.name }}
+		  	</span>
+		  </li>
+		</ul>
+	 </div>
+	 <div class="foods-wrapper" ref="foodsWrapper">
+	   <ul>
+	   	 <li v-for="item in goods" class="food-list food-list-hook">
+	   	   <h1 class="title">{{ item.name }}</h1>
+	   	   <ul>
+	   	   	 <li v-for="food in item.foods" class="food-item border-1px">
+	   	   	   <div class="icon">
+	   	   	   	 <img width="57" height="57" :src="food.icon">
+	   	   	   </div>
+	   	   	   <div class="content">
+	   	   	   	 <h2 class="name">{{ food.name }}</h2>
+	   	   	   	 <p class="desc">{{ food.description }}</p>
+	   	   	   	 <div class="extra">
+	   	   	   	   <span class="count">月售{{ food.sellCount }}份</span><span>好评率{{ food.rating }}</span>
+	   	   	   	 </div>
+	   	   	   	 <div class="price">
+	   	   	   	   <span class="now">￥{{ food.price }}</span><span class="old" v-show="food.oldPrice">￥{{ food.oldPrice }}</span>
+	   	   	   	 </div>
+	   	   	   	 <div class="cartcontrol-wrapper">
+	   	   	   	   <cartcontrol :food="food"></cartcontrol>
+	   	   	   	 </div>
+	   	   	   </div>
+	   	   	 </li>
+	   	   </ul>
+	   	 </li>
+	   </ul>
+	 </div>
+	</div>
 </template>
 
 <script >
@@ -64,13 +62,13 @@
     },
     computed: {
   	  currentIndex() {
-  	    for (let i = 0, len = this.listHeight.length; i   < len; i++) {
-  	  	  let height1 = this.listHeight[i], 
-	  		      heigth2 = this.listHeight[i + 1];
-  		    if (!height2 || (this.scrollY >= height1 &&   this.scrollY < height2)) {
-  		      return i;
-  		    }
-  	    }
+        for (let i = 0, len = this.listHeight.length; i < len; i++) {
+          let height1 = this.listHeight[i],
+              height2 = this.listHeight[i + 1];
+          if (!height2 || (this.scrollY >= height1 && this.scrollY < height2)) {
+            return i;
+          }
+        }
   	    return 0;
   	  },
       selectFoods() {
@@ -87,14 +85,12 @@
     },
     created() {
   	  this.classMap = ['decrease', 'discount', 'special'  , 'invoice', 'guarantee'];
-  
+
   	  this.$http.get('/api/goods')
           .then((response) => {
             response = response.data;
-            console.log(response)
             if(response.errno === ERR_OK) {
               this.goods = response.data;
-              console.log(this.goods);
 
               this.$nextTick(() => {
               	this._initScroll();
@@ -109,7 +105,7 @@
         if (!event._constructed) {
           return;
         }
-        let foodList = this.$els.foodsWrapper.getElementsByClassName('food-list-hook');
+        let foodList = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook');
         let el = foodList[index];
         this.foodsScroll.scrollToElement(el, 300);
       },
@@ -121,22 +117,22 @@
         this.$refs.food.show();
       },
       _initScroll() {
-        console.log(this.$els.menuWrapper); 
-      	this.menuScroll = new BScroll(this.$els.menuWrapper, { 
+
+      	this.menuScroll = new BScroll(this.$refs.menuWrapper, { 
       	  click: true
       	});
 
-        this.foodsScroll = new BScroll(this.$els.foodsWrapper, {
+        this.foodsScroll = new BScroll(this.$refs.foodsWrapper, {
           click: true,
           probeType: 3
         });
 
-        this.foodsScroll.on('scroll', (pos) => {
+        this.foodsScroll.on('scroll', (pos) => { 
           this.scrollY = Math.abs(Math.round(pos.y));
         });
-      },
+      }, 
       _calculateHeight() {
-        let foodList = this.$els.foodsWrapper.getElementsByClassName('food-list-hook');
+        let foodList = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook'); 
         let height = 0;
         this.listHeight.push(height);
         for (let i = 0; i < foodList.length; i++) {
