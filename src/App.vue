@@ -13,15 +13,13 @@
       </div>
     </div>
     <div class="content">
-      <router-view></router-view>
+      <router-view :seller="seller"></router-view>
     </div>
-    <!-- <v-shopcart></v-shopcart> -->
   </div>
 </template>
 
 <script>
   import header from './components/header/header';
-  import shopcart from './components/shopcart/shopcart';
 
   const ERR_OK = 0;
 
@@ -41,10 +39,9 @@
             console.log(this.seller);
           }
         });
-    },
+    }, 
     components: {
-      'v-header': header,
-      'v-shopcart': shopcart
+      'v-header': header
     }
   };
 

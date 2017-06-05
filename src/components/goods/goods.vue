@@ -28,7 +28,7 @@
 	   	   	   	   <span class="now">￥{{ food.price }}</span><span class="old" v-show="food.oldPrice">￥{{ food.oldPrice }}</span>
 	   	   	   	 </div>
 	   	   	   	 <div class="cartcontrol-wrapper">
-	   	   	   	   <cartcontrol :food="food"></cartcontrol>
+	   	   	   	   <v-cartcontrol @add="addFood" :food="food"></v-cartcontrol>
 	   	   	   	 </div>
 	   	   	   </div>
 	   	   	 </li>
@@ -36,6 +36,7 @@
 	   	 </li>
 	   </ul>
 	 </div>
+   <v-shopcart ref="shopcart" :deliveryPrice="seller.deliveryPrice" :minPrice="seller.minPrice"></v-shopcart>
 	</div>
 </template>
 
@@ -65,7 +66,7 @@
         for (let i = 0, len = this.listHeight.length; i < len; i++) {
           let height1 = this.listHeight[i],
               height2 = this.listHeight[i + 1];
-          if (!height2 || (this.scrollY >= height1 && this.scrollY < height2)) {
+          if (!height2 || (this.scrollY >= height1 && this.scrollY < height2)) { 
             return i;
           }
         }
@@ -92,6 +93,7 @@
             if(response.errno === ERR_OK) {
               this.goods = response.data;
 
+              // Vue.nextTick()在修改数据之后立即使用这个方法，获取更新后的 DOM。(异步更新队列)
               this.$nextTick(() => {
               	this._initScroll();
               	this._calculateHeight();
@@ -100,14 +102,24 @@
           });
     },
     methods: {
+      addFood(target) { 
+        this._drop(target);
+      },
+      _drop(target) {
+        // 体验优化,异步执行下落动画 
+        this.$nextTick(() => {
+          this.$refs.shopcart.drop(target);
+        });
+      },
       selectMenu(index, event) {
-        console.log(event)
         if (!event._constructed) {
+          //_constructed：better-scroll默认派发事件具有的属性、浏览器原生点击事件无该属性
           return;
         }
         let foodList = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook');
         let el = foodList[index];
         this.foodsScroll.scrollToElement(el, 300);
+        //派发滚动：scrollToElement(el, time, offsetX, offsetY, easing) 滚动到  某个元素，el（必填）表示 dom 元素，time 表示动画，offsetX 和 offsetY 表示坐标偏移量，easing 表示缓动函数
       },
       selectFood(food, event) {
         if (!event._constructed) {
@@ -116,21 +128,27 @@
         this.selectedFood = food;
         this.$refs.food.show();
       },
+      /**
+       * 初始化 bebetter-scroll
+       **/
       _initScroll() {
 
       	this.menuScroll = new BScroll(this.$refs.menuWrapper, { 
-      	  click: true
+      	  click: true //click: true 是否启用click事件
       	});
 
         this.foodsScroll = new BScroll(this.$refs.foodsWrapper, {
           click: true,
-          probeType: 3
+          probeType: 3 //probeType: 1 滚动的时候会派发scroll事件，会截流。2滚动的时候实时派发scroll事件，不会截流。 3除了实时派发scroll事件，在swipe的情况下仍然能实时派发scroll事件
         });
 
         this.foodsScroll.on('scroll', (pos) => { 
           this.scrollY = Math.abs(Math.round(pos.y));
         });
       }, 
+      /**
+       * 计算 右侧foodlist 各个模块的位置
+       **/
       _calculateHeight() {
         let foodList = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook'); 
         let height = 0;
@@ -143,7 +161,8 @@
       }
     },
     components: {
-      cartcontrol
+      'v-cartcontrol': cartcontrol,
+      'v-shopcart': shopcart
     }
   };
 </script>
@@ -162,7 +181,7 @@
   	  width: 80px
   	  background: #f3f5f7
   	  overflow-x: hidden
-  	  overflow-y: auto
+  	  overflow-y: hidden
   	  .menu-item
   	    display: table
   	    height: 54px
@@ -209,7 +228,7 @@
   	.foods-wrapper
   	  flex: 1
   	  overflow-x: hidden
-  	  overflow-y: auto
+  	  overflow-y: hidden
   	  .title
   	    padding-left: 14px
   	    height: 26px
